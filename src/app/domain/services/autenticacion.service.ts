@@ -27,8 +27,8 @@ export class AutenticacionService {
     return this.authState$.value.token;
   }
 
-  login(email: string, contraseña: string): Observable<LoginResponse> {
-    return this.repository.login({ email, contraseña })
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.repository.login({ email, password: password })
       .pipe(
         tap(response => {
           localStorage.setItem('auth_token', response.token);

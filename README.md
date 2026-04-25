@@ -138,7 +138,7 @@ Peligro:     #ef4444 (Red)
 
 ### Autenticación
 ```
-POST /api/autenticacion/login
+POST /api/auth/login
 POST /api/autenticacion/registrar
 GET  /api/autenticacion/usuario
 POST /api/autenticacion/logout

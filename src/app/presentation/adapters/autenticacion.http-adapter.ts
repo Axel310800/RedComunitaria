@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { IAutenticacionRepository } from '../../domain/repositories/autenticacion.repository';
 import { Usuario, LoginRequest, LoginResponse } from '../../domain/models/usuario.model';
 import { environment } from '../../../environments/environment';
@@ -10,14 +11,24 @@ import { environment } from '../../../environments/environment';
 })
 export class AutenticacionHttpAdapter implements IAutenticacionRepository {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/autenticacion`;
+  private apiUrl = `${environment.apiUrl}/auth`;
 
-  login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request);
-  }
+login(request: LoginRequest): Observable<LoginResponse> {
+  const body = {
+    email: request.email,
+    password: request.password
+  };
 
-  registrar(usuario: Partial<Usuario>): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.apiUrl}/registrar`, usuario);
+  return this.http.post<any>(`${this.apiUrl}/login`, body)
+    .pipe(
+      map((response: any) => ({
+        token: response.access_token,
+        usuario: response.usuario
+      }))
+    );
+}
+  registrar(usuario: Partial<Usuario>) {
+  return this.http.post<Usuario>(`${this.apiUrl}/register`, usuario);
   }
 
   obtenerUsuarioActual(): Observable<Usuario> {

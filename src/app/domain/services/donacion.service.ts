@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IDonacionRepository } from '../repositories/donacion.repository';
 import { Donacion, CreateDonacionRequest, DonacionListItem } from '../models/donacion.model';
 import { DONACION_REPOSITORY_TOKEN } from '../../infrastructure/injection-tokens';
 

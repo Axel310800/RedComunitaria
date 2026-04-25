@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IOllaRepository } from '../repositories/olla.repository';
 import { OllaComunas, CreateOllaRequest } from '../models/olla.model';
 import { OLLA_REPOSITORY_TOKEN } from '../../infrastructure/injection-tokens';
 

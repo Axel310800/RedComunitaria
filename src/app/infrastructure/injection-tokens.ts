@@ -4,13 +4,13 @@ import { IOllaRepository } from '../domain/repositories/olla.repository';
 import { IDonacionRepository } from '../domain/repositories/donacion.repository';
 
 export const AUTENTICACION_REPOSITORY_TOKEN = new InjectionToken<IAutenticacionRepository>(
-  'IAutenticacionRepository'
+  'autenticacion-repository'
 );
 
 export const OLLA_REPOSITORY_TOKEN = new InjectionToken<IOllaRepository>(
-  'IOllaRepository'
+  'olla-repository'
 );
 
 export const DONACION_REPOSITORY_TOKEN = new InjectionToken<IDonacionRepository>(
-  'IDonacionRepository'
+  'donacion-repository'
 );
