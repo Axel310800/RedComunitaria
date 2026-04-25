@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #1f2937;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.6;
+}
+
+/* Componentes comunes */
+.btn-primary {
+  @apply px-4 py-2 bg-primary text-white rounded font-semibold hover:bg-opacity-90 transition;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-secondary text-white rounded font-semibold hover:bg-opacity-90 transition;
+}
+
+.btn-outline {
+  @apply px-4 py-2 border-2 border-primary text-primary rounded font-semibold hover:bg-primary hover:text-white transition;
+}
+
+.card {
+  @apply bg-white rounded-lg shadow-md p-6 border border-gray-200;
+}
+
+.modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50;
+}
+
+.modal {
+  @apply bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4;
+}
+
+.input-base {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+.badge {
+  @apply inline-block px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+.badge-success {
+  @apply badge bg-green-100 text-green-800;
+}
+
+.badge-warning {
+  @apply badge bg-yellow-100 text-yellow-800;
+}
+
+.badge-danger {
+  @apply badge bg-red-100 text-red-800;
+}
+
+.badge-info {
+  @apply badge bg-blue-100 text-blue-800;
+}
+
+.table-row {
+  @apply border-b border-gray-200 hover:bg-gray-50 transition;
+}
