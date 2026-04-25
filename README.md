@@ -15,7 +15,7 @@ RedComunitaria es un sistema integral diseñado para:
 
 El proyecto implementa **Arquitectura Hexagonal** (Ports & Adapters) en ambas capas:
 
-### Frontend (Angular 21+)
+### Frontend (Angular 19)
 ```
 src/app/
 ├── domain/                 # Lógica de negocio pura
@@ -45,8 +45,8 @@ backend/
 ## 🛠️ Tecnologías
 
 ### Frontend
-- **Framework**: Angular 21+
-- **Styling**: Tailwind CSS
+- **Framework**: Angular 19
+- **Styling**: Tailwind CSS 3.4
 - **HTTP Client**: Angular HttpClient
 - **Routing**: Angular Router
 
