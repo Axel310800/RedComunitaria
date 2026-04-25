@@ -2,12 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { IOllaRepository } from '../repositories/olla.repository';
 import { OllaComunas, CreateOllaRequest } from '../models/olla.model';
+import { OLLA_REPOSITORY_TOKEN } from '../../infrastructure/injection-tokens';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OllaService {
-  private repository = inject(IOllaRepository);
+  private repository = inject(OLLA_REPOSITORY_TOKEN);
 
   obtenerOllas(filtros?: any): Observable<OllaComunas[]> {
     return this.repository.obtenerOllas(filtros);

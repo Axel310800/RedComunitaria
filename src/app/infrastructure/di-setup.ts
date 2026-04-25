@@ -5,6 +5,11 @@ import { IOllaRepository } from '../domain/repositories/olla.repository';
 import { OllaHttpAdapter } from '../presentation/adapters/olla.http-adapter';
 import { IDonacionRepository } from '../domain/repositories/donacion.repository';
 import { DonacionHttpAdapter } from '../presentation/adapters/donacion.http-adapter';
+import {
+  AUTENTICACION_REPOSITORY_TOKEN,
+  OLLA_REPOSITORY_TOKEN,
+  DONACION_REPOSITORY_TOKEN
+} from './injection-tokens';
 
 /**
  * Configuración de inyección de dependencias.
@@ -16,19 +21,19 @@ import { DonacionHttpAdapter } from '../presentation/adapters/donacion.http-adap
 export const dependencyInjectionProviders: Provider[] = [
   // Autenticación
   {
-    provide: IAutenticacionRepository,
+    provide: AUTENTICACION_REPOSITORY_TOKEN,
     useClass: AutenticacionHttpAdapter
   },
 
   // Ollas Comunes
   {
-    provide: IOllaRepository,
+    provide: OLLA_REPOSITORY_TOKEN,
     useClass: OllaHttpAdapter
   },
 
   // Donaciones
   {
-    provide: IDonacionRepository,
+    provide: DONACION_REPOSITORY_TOKEN,
     useClass: DonacionHttpAdapter
   }
 ];
