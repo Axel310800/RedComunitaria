@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { IDonacionRepository } from '../repositories/donacion.repository';
 import { Donacion, CreateDonacionRequest, DonacionListItem } from '../models/donacion.model';
+import { DONACION_REPOSITORY_TOKEN } from '../../infrastructure/injection-tokens';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DonacionService {
-  private repository = inject(IDonacionRepository);
+  private repository = inject(DONACION_REPOSITORY_TOKEN);
 
   obtenerDonaciones(filtros?: any): Observable<DonacionListItem[]> {
     return this.repository.obtenerDonaciones(filtros);

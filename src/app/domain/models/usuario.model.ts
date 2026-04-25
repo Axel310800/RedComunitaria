@@ -2,14 +2,14 @@ export interface Usuario {
   id?: number;
   email: string;
   nombre: string;
-  contraseña?: string;
+  password?: string;
   rol: 'admin' | 'donante' | 'voluntario';
   fechaCreacion?: Date;
 }
 
 export interface LoginRequest {
   email: string;
-  contraseña: string;
+  password: string;
 }
 
 export interface LoginResponse {

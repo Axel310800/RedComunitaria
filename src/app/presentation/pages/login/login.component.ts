@@ -27,7 +27,7 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
             <!-- Email Input -->
             <div>
               <label for="email" class="block text-sm font-semibold text-foreground mb-2">
-                Correo Electrónico
+                Correo Electronico
               </label>
               <input
                 type="email"
@@ -43,14 +43,14 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
             <!-- Password Input -->
             <div>
               <label for="password" class="block text-sm font-semibold text-foreground mb-2">
-                Contraseña
+                Contrasena
               </label>
               <input
                 type="password"
                 id="password"
                 name="password"
-                [(ngModel)]="form.contraseña"
-                placeholder="Tu contraseña"
+                [(ngModel)]="form.password"
+                placeholder="Tu contrasena"
                 class="input-base"
                 required
               />
@@ -67,27 +67,32 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
               [disabled]="isLoading"
               class="w-full btn-primary disabled:opacity-50"
             >
-              <span *ngIf="!isLoading">Iniciar Sesión</span>
+              <span *ngIf="!isLoading">Iniciar Sesion</span>
               <span *ngIf="isLoading">Cargando...</span>
             </button>
           </form>
 
           <!-- Footer -->
           <div class="mt-6 text-center text-sm text-gray-500">
-            <p>¿No tienes cuenta? <a href="#" class="text-primary font-semibold hover:underline">Registrate aquí</a></p>
+            <p>No tienes cuenta? <a href="#" class="text-primary font-semibold hover:underline">Registrate aqui</a></p>
           </div>
-        </div>
-
-        <!-- Info Message -->
-        <div class="mt-8 text-center text-white">
-          <p class="text-sm opacity-90">
-            Plataforma de distribución equitativa de recursos en ollas comunes
-          </p>
         </div>
       </div>
     </div>
   `,
-  styles: []
+  styles: [`
+    :host {
+      display: block;
+    }
+
+    .input-base {
+      @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition;
+    }
+
+    .btn-primary {
+      @apply px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition w-full;
+    }
+  `]
 })
 export class LoginComponent {
   private authService = inject(AutenticacionService);
@@ -95,30 +100,31 @@ export class LoginComponent {
 
   form = {
     email: '',
-    contraseña: ''
+    password: ''
   };
 
   isLoading = false;
   error: string | null = null;
 
-  onSubmit() {
-    if (!this.form.email || !this.form.contraseña) {
+  onSubmit(): void {
+    this.error = null;
+    
+    if (!this.form.email || !this.form.password) {
       this.error = 'Por favor completa todos los campos';
       return;
     }
 
     this.isLoading = true;
-    this.error = null;
-
-    this.authService.login(this.form.email, this.form.contraseña)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/inicio']);
-        },
-        error: (err) => {
-          this.isLoading = false;
-          this.error = err.error?.mensaje || 'Error al iniciar sesión';
-        }
-      });
+    
+    this.authService.login(this.form.email, this.form.password).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.router.navigate(['/inicio']);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.error = err.error?.message || 'Error al iniciar sesion';
+      }
+    });
   }
 }

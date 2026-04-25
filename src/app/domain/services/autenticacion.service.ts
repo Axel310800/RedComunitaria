@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, tap, map } from 'rxjs';
-import { IAutenticacionRepository } from '../repositories/autenticacion.repository';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Usuario, LoginRequest, LoginResponse, AuthState } from '../models/usuario.model';
+import { AUTENTICACION_REPOSITORY_TOKEN } from '../../infrastructure/injection-tokens';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AutenticacionService {
-  private repository = inject(IAutenticacionRepository);
+  private repository = inject(AUTENTICACION_REPOSITORY_TOKEN);
   private authState$ = new BehaviorSubject<AuthState>({
     usuario: null,
     token: localStorage.getItem('auth_token'),
@@ -26,8 +26,8 @@ export class AutenticacionService {
     return this.authState$.value.token;
   }
 
-  login(email: string, contraseña: string): Observable<LoginResponse> {
-    return this.repository.login({ email, contraseña })
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.repository.login({ email, password })
       .pipe(
         tap(response => {
           localStorage.setItem('auth_token', response.token);
