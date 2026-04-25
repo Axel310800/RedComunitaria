@@ -67,13 +67,10 @@ backend/
 
 ```bash
 # Instalar dependencias
-pnpm install
+npm install
 
 # Desarrollar
-pnpm run dev
-
-# Build producción
-pnpm run build
+ng serve
 ```
 
 El frontend estará disponible en `http://localhost:4200`
@@ -107,7 +104,7 @@ El backend estará disponible en `http://localhost:8000`
 ### Login
 ```
 Email: donante1@email.com
-Contraseña: password123
+Contraseña: 123456
 ```
 
 La autenticación usa JWT tokens almacenados en localStorage y enviados en header `Authorization: Bearer <token>`
