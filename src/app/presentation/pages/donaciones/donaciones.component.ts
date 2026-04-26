@@ -19,7 +19,6 @@ import { OllaComunas } from '../../../domain/models/olla.model';
           <p class="text-gray-600">Tu solidaridad marca la diferencia en cada familia</p>
         </div>
       </div>
-
       <!-- CTA Section -->
       <div class="bg-gradient-to-r from-primary to-secondary text-white mx-4 my-8 rounded-lg p-6 container mx-auto">
         <p class="mb-4">
