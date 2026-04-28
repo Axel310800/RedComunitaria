@@ -74,7 +74,7 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
 
           <!-- Footer -->
           <div class="mt-6 text-center text-sm text-gray-500">
-            <p>¿No tienes cuenta? <a href="#" class="text-primary font-semibold hover:underline">Registrate aquí</a></p>
+            <p>¿No tienes cuenta? <button (click)="navigateToRegister()" class="text-primary font-semibold hover:underline bg-none border-none p-0 cursor-pointer">Registrate aquí</button></p>
           </div>
         </div>
 
@@ -113,12 +113,16 @@ export class LoginComponent {
     this.authService.login(this.form.email, this.form.password)
       .subscribe({
         next: () => {
-          this.router.navigate(['/inicio']);
+          this.router.navigate(['/splash']);
         },
         error: (err) => {
           this.isLoading = false;
           this.error = err.error?.mensaje || 'Error al iniciar sesión';
         }
       });
+  }
+
+  navigateToRegister() {
+    this.router.navigate(['/registro']);
   }
 }
