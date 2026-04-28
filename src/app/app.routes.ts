@@ -8,12 +8,12 @@ import { RegisterComponent } from './presentation/pages/register/register.compon
 import { authGuard } from './presentation/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/inicio', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'splash', component: SplashComponent },
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegisterComponent },
   { path: 'inicio', component: HomeComponent, canActivate: [authGuard] },
   { path: 'ollas-comunes', component: OllasComunesComponent, canActivate: [authGuard] },
   { path: 'donar', component: DonacionesComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: '/inicio' }
+  { path: '**', redirectTo: '/login' }
 ];

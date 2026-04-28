@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AutenticacionService } from '../../domain/services/autenticacion.service';
+import { AutenticacionService } from '../../../domain/services/autenticacion.service';
 
 @Component({
   selector: 'app-register',
@@ -339,13 +339,13 @@ export class RegisterComponent implements OnInit {
     };
 
     this.authService.registrar(userData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.isLoading = false;
         localStorage.setItem('auth_token', response.token);
         localStorage.setItem('usuario_nombre', JSON.stringify(response.usuario));
         this.router.navigate(['/splash']);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading = false;
         this.errorMessage = err.error?.message || 'Error al registrarse. Intenta nuevamente.';
         console.error('Error de registro:', err);

@@ -81,6 +81,17 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class RegisterRequest(BaseModel):
+    nombre: str
+    email: str
+    password: str
+    rol: str
+    telefono: Optional[str] = None
+    nombre_olla: Optional[str] = None
+    ubicacion: Optional[str] = None
+    numero_beneficiarios: Optional[int] = None
+    tipo_contribucion: Optional[str] = None
+
 class UsuarioResponse(BaseModel):
     id: int
     email: str
@@ -142,9 +153,9 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=500, detail=f"Error al procesar login: {str(e)}")
 
 @app.post("/api/auth/register")
-async def register(request: LoginRequest):
+async def register(request: RegisterRequest):
     """
-    Registro endpoint (básico)
+    Registro endpoint - Acepta datos de donante o responsable de olla
     """
     try:
         connection = get_db_connection()
@@ -161,14 +172,24 @@ async def register(request: LoginRequest):
         # Crear usuario
         hashed_password = hash_password(request.password)
         insert_query = """
-            INSERT INTO usuarios (email, nombre, password_hash, tipo_usuario, fecha_creacion)
+            INSERT INTO usuarios (email, nombre, password_hash, rol, fecha_creacion)
             VALUES (%s, %s, %s, %s, NOW())
         """
-        cursor.execute(insert_query, (request.email, request.email.split('@')[0], hashed_password, 'donante'))
+        cursor.execute(insert_query, (request.email, request.nombre, hashed_password, request.rol))
         connection.commit()
         
         # Obtener el usuario creado
         usuario_id = cursor.lastrowid
+        
+        # Si es responsable, crear la olla común
+        if request.rol == 'responsable' and request.nombre_olla:
+            olla_query = """
+                INSERT INTO ollas_comunes (nombre, ubicacion, numero_beneficiarios, responsable_id, fecha_creacion, estado)
+                VALUES (%s, %s, %s, %s, NOW(), 'activa')
+            """
+            cursor.execute(olla_query, (request.nombre_olla, request.ubicacion, request.numero_beneficiarios, usuario_id))
+            connection.commit()
+        
         cursor.close()
         connection.close()
         
@@ -176,7 +197,7 @@ async def register(request: LoginRequest):
         token_data = {
             "id": usuario_id,
             "email": request.email,
-            "rol": "donante"
+            "rol": request.rol
         }
         access_token = create_access_token(token_data)
         
@@ -185,8 +206,8 @@ async def register(request: LoginRequest):
             usuario=UsuarioResponse(
                 id=usuario_id,
                 email=request.email,
-                nombre=request.email.split('@')[0],
-                rol="donante"
+                nombre=request.nombre,
+                rol=request.rol
             )
         )
     
@@ -241,9 +262,10 @@ async def get_ollas():
         
         query = """
             SELECT 
-                id, nombre, responsable, ubicacion, numero_beneficiarios,
+                id, nombre, responsable, ubicacion, direccion, numero_beneficiarios,
                 prioridad, estado, fecha_creacion
             FROM ollas_comunes
+            WHERE activa = TRUE
             ORDER BY fecha_creacion DESC
         """
         cursor.execute(query)
@@ -251,7 +273,7 @@ async def get_ollas():
         cursor.close()
         connection.close()
         
-        return {"ollas": ollas}
+        return ollas if ollas else []
     
     except Exception as e:
         print(f"❌ Error obteniendo ollas: {str(e)}")
@@ -266,28 +288,29 @@ async def create_olla(olla_data: dict):
         
         query = """
             INSERT INTO ollas_comunes 
-            (nombre, responsable, ubicacion, numero_beneficiarios, prioridad, estado, fecha_creacion)
-            VALUES (%s, %s, %s, %s, %s, %s, NOW())
+            (nombre, responsable, ubicacion, direccion, numero_beneficiarios, prioridad, estado, activa, fecha_creacion)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, TRUE, NOW())
         """
         
         cursor.execute(query, (
             olla_data.get('nombre'),
             olla_data.get('responsable'),
             olla_data.get('ubicacion'),
-            olla_data.get('numero_beneficiarios', 0),
-            olla_data.get('prioridad', 'MEDIA'),
-            olla_data.get('estado', 'ACTIVA')
+            olla_data.get('direccion', ''),
+            int(olla_data.get('numero_beneficiarios', 0)),
+            olla_data.get('prioridad', 'MEDIA').upper(),
+            olla_data.get('estado', 'PENDIENTE').upper()
         ))
         
         connection.commit()
         cursor.close()
         connection.close()
         
-        return {"mensaje": "Olla común creada exitosamente"}
+        return {"mensaje": "Olla común creada exitosamente", "id": cursor.lastrowid}
     
     except Exception as e:
         print(f"❌ Error creando olla: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error al crear olla")
+        raise HTTPException(status_code=500, detail=f"Error al crear olla: {str(e)}")
 
 # Rutas de Donaciones
 @app.get("/api/donaciones")
@@ -299,7 +322,8 @@ async def get_donaciones():
         
         query = """
             SELECT 
-                id, donante, recurso, cantidad, olla_destino, fecha_donacion, estado
+                id, donante_nombre, donante_email, donante_telefono, tipo_recurso, cantidad_kg, 
+                olla_destino_id, fecha_donacion, estado
             FROM donaciones
             ORDER BY fecha_donacion DESC
         """
@@ -308,11 +332,11 @@ async def get_donaciones():
         cursor.close()
         connection.close()
         
-        return {"donaciones": donaciones}
+        return donaciones if donaciones else []
     
     except Exception as e:
         print(f"❌ Error obteniendo donaciones: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error al obtener donaciones")
+        raise HTTPException(status_code=500, detail=f"Error al obtener donaciones: {str(e)}")
 
 @app.post("/api/donaciones")
 async def create_donacion(donacion_data: dict):
@@ -323,27 +347,29 @@ async def create_donacion(donacion_data: dict):
         
         query = """
             INSERT INTO donaciones 
-            (donante, recurso, cantidad, olla_destino, fecha_donacion, estado)
-            VALUES (%s, %s, %s, %s, NOW(), %s)
+            (donante_nombre, donante_email, donante_telefono, tipo_recurso, cantidad_kg, olla_destino_id, fecha_donacion, estado)
+            VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s)
         """
         
         cursor.execute(query, (
-            donacion_data.get('donante'),
-            donacion_data.get('recurso'),
-            donacion_data.get('cantidad'),
-            donacion_data.get('olla_destino'),
-            donacion_data.get('estado', 'PENDIENTE')
+            donacion_data.get('donante_nombre'),
+            donacion_data.get('donante_email'),
+            donacion_data.get('donante_telefono', ''),
+            donacion_data.get('tipo_recurso'),
+            float(donacion_data.get('cantidad_kg', 0)),
+            int(donacion_data.get('olla_destino_id')),
+            donacion_data.get('estado', 'PENDIENTE').upper()
         ))
         
         connection.commit()
         cursor.close()
         connection.close()
         
-        return {"mensaje": "Donación registrada exitosamente"}
+        return {"mensaje": "Donación registrada exitosamente", "id": cursor.lastrowid}
     
     except Exception as e:
         print(f"❌ Error creando donación: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error al crear donación")
+        raise HTTPException(status_code=500, detail=f"Error al crear donación: {str(e)}")
 
 # Health check
 @app.get("/api/health")
@@ -362,4 +388,3 @@ if __name__ == "__main__":
     print(f"🚀 Iniciando servidor en {API_HOST}:{API_PORT}")
     uvicorn.run(app, host=API_HOST, port=API_PORT)
     print(hash_password("123456"))
-

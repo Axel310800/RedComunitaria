@@ -3,7 +3,7 @@ export interface Usuario {
   email: string;
   nombre: string;
   password?: string;
-  rol: 'admin' | 'donante' | 'voluntario';
+  rol: 'admin' | 'donante' | 'responsable';
   fechaCreacion?: Date;
 }
 

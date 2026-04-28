@@ -8,12 +8,11 @@ USE redcomunitaria;
 -- ============================================
 -- Insertar Usuarios de Prueba
 -- ============================================
-INSERT INTO usuarios (email, nombre, contraseña_hash, rol) VALUES
+INSERT INTO usuarios (email, nombre, password_hash, rol) VALUES
 ('admin@redcomunitaria.pe', 'Admin RedComunitaria', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUVgqDDm', 'admin'),
 ('donante1@email.com', 'Juan Pérez', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUVgqDDm', 'donante'),
 ('donante2@email.com', 'María González', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUVgqDDm', 'donante'),
-('voluntario1@email.com', 'Carlos Flores', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUVgqDDm', 'voluntario');
-
+('responsable1@email.com', 'Carlos Flores', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5YmMxSUVgqDDm', 'responsable');
 -- ============================================
 -- Insertar Ollas Comunes
 -- ============================================
