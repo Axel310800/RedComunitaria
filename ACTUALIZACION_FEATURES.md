@@ -1,4 +1,4 @@
-# Actualización de Features - RedComunitaria
+# Actualización Importante - RedComunitaria
 
 ## Cambios Implementados
 
@@ -14,10 +14,6 @@ Se agregó un nuevo componente `SplashComponent` que muestra una pantalla de bie
 - Barra de progreso animada
 - Desvanecimiento suave después de 3 segundos
 - Redirige automáticamente a `/inicio`
-
-**Colores**:
-- Gradiente Cyan #0891b2 a Navy #1e3a8a
-- Animaciones suave con easing personalizado
 
 ### 2. Componente de Registro con Roles Dinámicos (✅ COMPLETADO)
 
