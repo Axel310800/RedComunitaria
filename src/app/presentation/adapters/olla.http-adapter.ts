@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 })
 export class OllaHttpAdapter implements IOllaRepository {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/ollas-comunes`;
+  private apiUrl = `${environment.apiUrl}/ollas`;
 
   obtenerOllas(filtros?: any): Observable<OllaComunas[]> {
     return this.http.get<OllaComunas[]>(this.apiUrl, { params: filtros });
