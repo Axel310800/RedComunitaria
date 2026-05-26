@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AutenticacionService } from '../../../domain/services/autenticacion.service';
 
 @Component({
   selector: 'app-home',
@@ -15,6 +16,9 @@ import { RouterLink } from '@angular/router';
             ♥ Solidaridad que conecta
           </span>
         </div>
+        <p class="text-sm uppercase tracking-[0.3em] mb-4 opacity-90">
+          {{ welcomeMessage }}
+        </p>
         <h1 class="text-4xl md:text-5xl font-bold mb-6 text-balance">
           Distribución Equitativa de Recursos en Ollas Comunes
         </h1>
@@ -141,5 +145,17 @@ import { RouterLink } from '@angular/router';
   `,
   styles: []
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
+  private authService = inject(AutenticacionService);
+  welcomeMessage = 'Bienvenido a RedComunitaria';
+
+  ngOnInit() {
+    this.authService.getAuthState$().subscribe(state => {
+      if (state.usuario?.nombre) {
+        this.welcomeMessage = `Hola, ${state.usuario.nombre}`;
+      } else {
+        this.welcomeMessage = 'Bienvenido a RedComunitaria';
+      }
+    });
+  }
 }

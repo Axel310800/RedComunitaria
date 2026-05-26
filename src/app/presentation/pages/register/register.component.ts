@@ -277,8 +277,8 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
 })
 export class RegisterComponent implements OnInit {
   router = inject(Router);
-  private fb = inject(FormBuilder);
-  private authService = inject(AutenticacionService);
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AutenticacionService);
 
   currentStep = 1;
   selectedRole: 'donante' | 'responsable' | null = null;
@@ -339,10 +339,8 @@ export class RegisterComponent implements OnInit {
     };
 
     this.authService.registrar(userData).subscribe({
-      next: (response: any) => {
+      next: () => {
         this.isLoading = false;
-        localStorage.setItem('auth_token', response.token);
-        localStorage.setItem('usuario_nombre', JSON.stringify(response.usuario));
         this.router.navigate(['/splash']);
       },
       error: (err: any) => {

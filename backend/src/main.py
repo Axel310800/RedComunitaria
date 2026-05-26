@@ -73,6 +73,19 @@ def create_access_token(data: dict) -> str:
     encoded_jwt = jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
     return encoded_jwt
 
+
+def get_user_from_token(authorization: Optional[str]) -> dict:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token no proporcionado")
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expirado")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Token inválido")
+
 # Modelos (Pydantic)
 from pydantic import BaseModel
 from typing import Optional
@@ -91,6 +104,11 @@ class RegisterRequest(BaseModel):
     ubicacion: Optional[str] = None
     numero_beneficiarios: Optional[int] = None
     tipo_contribucion: Optional[str] = None
+
+class UpdateProfileRequest(BaseModel):
+    nombre: Optional[str] = None
+    email: Optional[str] = None
+    password: Optional[str] = None
 
 class UsuarioResponse(BaseModel):
     id: int
@@ -223,19 +241,12 @@ async def get_usuario(authorization: Optional[str] = None):
     Obtiene el usuario actual desde el token
     """
     try:
-        if not authorization or not authorization.startswith("Bearer "):
-            raise HTTPException(status_code=401, detail="Token no proporcionado")
-        
-        token = authorization.split(" ")[1]
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = get_user_from_token(authorization)
         usuario_id = payload.get("id")
-        
-        if not usuario_id:
-            raise HTTPException(status_code=401, detail="Token inválido")
         
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT id, email, nombre, tipo_usuario FROM usuarios WHERE id = %s"
+        query = "SELECT id, email, nombre, rol FROM usuarios WHERE id = %s"
         cursor.execute(query, (usuario_id,))
         usuario = cursor.fetchone()
         cursor.close()
@@ -251,6 +262,115 @@ async def get_usuario(authorization: Optional[str] = None):
     except Exception as e:
         print(f"❌ Error obteniendo usuario: {str(e)}")
         raise HTTPException(status_code=500, detail="Error al obtener usuario")
+
+@app.patch("/api/auth/usuario")
+async def update_usuario(request: UpdateProfileRequest, authorization: Optional[str] = None):
+    """Actualiza los datos del usuario actual"""
+    try:
+        payload = get_user_from_token(authorization)
+        usuario_id = payload.get("id")
+        if not usuario_id:
+            raise HTTPException(status_code=401, detail="Token inválido")
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT id, email, nombre, rol FROM usuarios WHERE id = %s", (usuario_id,))
+        usuario = cursor.fetchone()
+        if not usuario:
+            cursor.close()
+            connection.close()
+            raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+        updates = []
+        values = []
+        if request.nombre:
+            updates.append("nombre = %s")
+            values.append(request.nombre)
+        if request.email:
+            updates.append("email = %s")
+            values.append(request.email)
+        if request.password:
+            updates.append("password_hash = %s")
+            values.append(hash_password(request.password))
+
+        if not updates:
+            cursor.close()
+            connection.close()
+            raise HTTPException(status_code=400, detail="No se proporcionaron datos para actualizar")
+
+        update_query = f"UPDATE usuarios SET {', '.join(updates)} WHERE id = %s"
+        values.append(usuario_id)
+        cursor.execute(update_query, tuple(values))
+        connection.commit()
+
+        cursor.execute("SELECT id, email, nombre, rol FROM usuarios WHERE id = %s", (usuario_id,))
+        actualizado = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        return actualizado
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error actualizando usuario: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error al actualizar usuario")
+
+@app.post("/api/auth/logout")
+async def logout():
+    return {"message": "Sesión cerrada"}
+
+@app.post("/api/auth/verificar-token")
+async def verificar_token(request: dict):
+    token = request.get("token")
+    if not token:
+        raise HTTPException(status_code=400, detail="Token no proporcionado")
+    try:
+        jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return True
+    except Exception:
+        return False
+
+@app.get("/api/admin/dashboard")
+async def admin_dashboard(authorization: Optional[str] = None):
+    """Devuelve estadísticas de administración"""
+    try:
+        payload = get_user_from_token(authorization)
+        if payload.get("rol") != "admin":
+            raise HTTPException(status_code=403, detail="Acceso denegado")
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        cursor.execute("SELECT COUNT(*) AS total_ollas FROM ollas_comunes WHERE activa = TRUE")
+        total_ollas = cursor.fetchone().get("total_ollas", 0)
+
+        cursor.execute("SELECT COUNT(*) AS total_donantes FROM usuarios WHERE rol = 'donante'")
+        total_donantes = cursor.fetchone().get("total_donantes", 0)
+
+        cursor.execute("SELECT COUNT(*) AS total_responsables FROM usuarios WHERE rol = 'responsable'")
+        total_responsables = cursor.fetchone().get("total_responsables", 0)
+
+        cursor.execute("SELECT COUNT(*) AS total_usuarios FROM usuarios")
+        total_usuarios = cursor.fetchone().get("total_usuarios", 0)
+
+        cursor.execute("SELECT COUNT(*) AS total_donaciones FROM donaciones")
+        total_donaciones = cursor.fetchone().get("total_donaciones", 0)
+
+        cursor.close()
+        connection.close()
+
+        return {
+            "total_usuarios": total_usuarios,
+            "total_ollas": total_ollas,
+            "total_donantes": total_donantes,
+            "total_responsables": total_responsables,
+            "total_donaciones": total_donaciones
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error en dashboard admin: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error al obtener estadísticas de administrador")
 
 # Rutas de Ollas Comunes
 @app.get("/api/ollas")

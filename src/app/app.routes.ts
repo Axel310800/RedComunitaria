@@ -5,6 +5,8 @@ import { OllasComunesComponent } from './presentation/pages/ollas-comunes/ollas-
 import { DonacionesComponent } from './presentation/pages/donaciones/donaciones.component';
 import { SplashComponent } from './presentation/components/splash/splash.component';
 import { RegisterComponent } from './presentation/pages/register/register.component';
+import { PerfilComponent } from './presentation/pages/perfil/perfil.component';
+import { AdminDashboardComponent } from './presentation/pages/admin-dashboard/admin-dashboard.component';
 import { authGuard } from './presentation/guards/auth.guard';
 
 export const routes: Routes = [
@@ -13,7 +15,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'registro', component: RegisterComponent },
   { path: 'inicio', component: HomeComponent, canActivate: [authGuard] },
+  { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'ollas-comunes', component: OllasComunesComponent, canActivate: [authGuard] },
   { path: 'donar', component: DonacionesComponent, canActivate: [authGuard] },
+  { path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '/login' }
 ];

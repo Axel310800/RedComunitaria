@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AutenticacionService } from '../../../domain/services/autenticacion.service';
 
 @Component({
   selector: 'app-splash',
@@ -221,19 +222,16 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class SplashComponent implements OnInit {
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AutenticacionService);
   userName: string | null = null;
 
   ngOnInit() {
-    const user = localStorage.getItem('usuario_nombre');
-    if (user) {
-      try {
-        const userData = JSON.parse(user);
-        this.userName = userData.nombre || userData.email?.split('@')[0] || '';
-      } catch {
-        this.userName = user;
+    this.authService.getAuthState$().subscribe(state => {
+      if (state.usuario) {
+        this.userName = state.usuario.nombre || state.usuario.email?.split('@')[0] || null;
       }
-    }
+    });
 
     setTimeout(() => {
       this.router.navigate(['/inicio']);

@@ -30,6 +30,12 @@ import { Usuario } from '../../../../domain/models/usuario.model';
               Inicio
             </a>
             <a *ngIf="isAuthenticated" 
+               routerLink="/perfil" 
+               routerLinkActive="text-primary font-semibold"
+               class="text-foreground hover:text-primary transition">
+              Mi Perfil
+            </a>
+            <a *ngIf="isAuthenticated" 
                routerLink="/ollas-comunes" 
                routerLinkActive="text-primary font-semibold"
                class="text-foreground hover:text-primary transition">
@@ -40,6 +46,12 @@ import { Usuario } from '../../../../domain/models/usuario.model';
                routerLinkActive="text-primary font-semibold"
                class="text-foreground hover:text-primary transition">
               Donar
+            </a>
+            <a *ngIf="usuario?.rol === 'admin'" 
+               routerLink="/admin/dashboard" 
+               routerLinkActive="text-primary font-semibold"
+               class="text-foreground hover:text-primary transition">
+              Dashboard Admin
             </a>
           </div>
 
@@ -67,8 +79,8 @@ import { Usuario } from '../../../../domain/models/usuario.model';
   `]
 })
 export class NavbarComponent implements OnInit {
-  private authService = inject(AutenticacionService);
-  private router = inject(Router);
+  private readonly authService = inject(AutenticacionService);
+  private readonly router = inject(Router);
   
   isAuthenticated = false;
   usuario: Usuario | null = null;
