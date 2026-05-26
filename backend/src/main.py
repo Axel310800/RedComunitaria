@@ -26,6 +26,8 @@ API_HOST = os.getenv('API_HOST', '0.0.0.0')
 
 app = FastAPI(title="RedComunitaria API", version="1.0.0")
 
+USER_SELECT_QUERY = "SELECT id, email, nombre, rol FROM usuarios WHERE id = %s"
+
 # Configurar CORS
 app.add_middleware(
     CORSMiddleware,
@@ -246,8 +248,7 @@ async def get_usuario(authorization: Optional[str] = None):
         
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT id, email, nombre, rol FROM usuarios WHERE id = %s"
-        cursor.execute(query, (usuario_id,))
+        cursor.execute(USER_SELECT_QUERY, (usuario_id,))
         usuario = cursor.fetchone()
         cursor.close()
         connection.close()
@@ -274,7 +275,7 @@ async def update_usuario(request: UpdateProfileRequest, authorization: Optional[
 
         connection = get_db_connection()
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT id, email, nombre, rol FROM usuarios WHERE id = %s", (usuario_id,))
+        cursor.execute(USER_SELECT_QUERY, (usuario_id,))
         usuario = cursor.fetchone()
         if not usuario:
             cursor.close()
@@ -303,7 +304,7 @@ async def update_usuario(request: UpdateProfileRequest, authorization: Optional[
         cursor.execute(update_query, tuple(values))
         connection.commit()
 
-        cursor.execute("SELECT id, email, nombre, rol FROM usuarios WHERE id = %s", (usuario_id,))
+        cursor.execute(USER_SELECT_QUERY, (usuario_id,))
         actualizado = cursor.fetchone()
         cursor.close()
         connection.close()

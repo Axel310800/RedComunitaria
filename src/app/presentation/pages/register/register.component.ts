@@ -328,7 +328,7 @@ export class RegisterComponent implements OnInit {
       telefono: formData.telefono,
       rol: this.selectedRole,
       ...(this.selectedRole === 'donante' && {
-        tipo_contribución: formData.tipoContribución,
+        tipo_contribucion: formData['tipoContribución'] || formData.tipoContribucion,
         ubicacion: formData.ubicacion
       }),
       ...(this.selectedRole === 'responsable' && {

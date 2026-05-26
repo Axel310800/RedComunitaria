@@ -39,6 +39,14 @@ export class AutenticacionService {
     return this.authState$.value.token;
   }
 
+  getCurrentUser(): Usuario | null {
+    return this.authState$.value.usuario;
+  }
+
+  isAdmin(): boolean {
+    return this.authState$.value.usuario?.rol === 'admin';
+  }
+
   login(email: string, password: string): Observable<LoginResponse> {
     return this.repository.login({ email, password: password })
       .pipe(

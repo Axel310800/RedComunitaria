@@ -7,7 +7,7 @@ import { SplashComponent } from './presentation/components/splash/splash.compone
 import { RegisterComponent } from './presentation/pages/register/register.component';
 import { PerfilComponent } from './presentation/pages/perfil/perfil.component';
 import { AdminDashboardComponent } from './presentation/pages/admin-dashboard/admin-dashboard.component';
-import { authGuard } from './presentation/guards/auth.guard';
+import { authGuard, adminGuard } from './presentation/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -18,6 +18,6 @@ export const routes: Routes = [
   { path: 'perfil', component: PerfilComponent, canActivate: [authGuard] },
   { path: 'ollas-comunes', component: OllasComunesComponent, canActivate: [authGuard] },
   { path: 'donar', component: DonacionesComponent, canActivate: [authGuard] },
-  { path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'admin/dashboard', component: AdminDashboardComponent, canActivate: [authGuard, adminGuard] },
   { path: '**', redirectTo: '/login' }
 ];
