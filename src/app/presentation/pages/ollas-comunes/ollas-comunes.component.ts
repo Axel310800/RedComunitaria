@@ -250,9 +250,10 @@ import { OllaComunas, CreateOllaRequest } from '../../../domain/models/olla.mode
   styles: []
 })
 export class OllasComunesComponent implements OnInit {
-  private ollaService = inject(OllaService);
+  private readonly ollaService = inject(OllaService);
 
   ollas: OllaComunas[] = [];
+  allOllas: OllaComunas[] = [];
   isLoading = false;
   searchTerm = '';
   filtroEstado = '';
@@ -279,7 +280,8 @@ export class OllasComunesComponent implements OnInit {
     this.isLoading = true;
     this.ollaService.obtenerOllas().subscribe({
       next: (data) => {
-        this.ollas = data;
+        this.allOllas = data;
+        this.applyFilters();
         this.isLoading = false;
       },
       error: () => {
@@ -289,8 +291,21 @@ export class OllasComunesComponent implements OnInit {
   }
 
   onSearch() {
-    // Implement search/filter logic
-    this.loadOllas();
+    this.applyFilters();
+  }
+
+  private applyFilters() {
+    const searchTerm = this.searchTerm?.trim().toLowerCase();
+
+    this.ollas = this.allOllas.filter((olla) => {
+      const matchesSearch = !searchTerm ||
+        olla.nombre.toLowerCase().includes(searchTerm) ||
+        olla.ubicacion.toLowerCase().includes(searchTerm);
+
+      const matchesPriority = !this.filtroEstado || olla.prioridad === this.filtroEstado;
+
+      return matchesSearch && matchesPriority;
+    });
   }
 
   openDetailsModal(olla: OllaComunas) {

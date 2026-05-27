@@ -96,6 +96,22 @@ def assert_admin(authorization: Optional[str]) -> dict:
         raise HTTPException(status_code=403, detail="Acceso denegado")
     return payload
 
+
+def map_olla_row(olla: dict) -> dict:
+    return {
+        "id": olla.get("id"),
+        "nombre": olla.get("nombre"),
+        "responsable": olla.get("responsable"),
+        "ubicacion": olla.get("ubicacion"),
+        "direccion": olla.get("direccion"),
+        "numeroBeneficiarios": int(olla.get("numero_beneficiarios") or 0),
+        "prioridad": olla.get("prioridad"),
+        "estado": olla.get("estado"),
+        "fechaCreacion": olla.get("fecha_creacion"),
+        "necesidades": [],
+        "stock": []
+    }
+
 # Modelos (Pydantic)
 from pydantic import BaseModel
 
@@ -395,12 +411,13 @@ async def get_ollas():
             ORDER BY fecha_creacion DESC
         """
         cursor.execute(query)
-        ollas = cursor.fetchall()
+        rows = cursor.fetchall()
         cursor.close()
         connection.close()
-        
-        return ollas if ollas else []
-    
+
+        ollas = [map_olla_row(row) for row in rows] if rows else []
+        return ollas
+
     except Exception as e:
         print(f"❌ Error obteniendo ollas: {str(e)}")
         raise HTTPException(status_code=500, detail="Error al obtener ollas")
@@ -429,10 +446,11 @@ async def create_olla(olla_data: dict):
         ))
         
         connection.commit()
+        inserted_id = cursor.lastrowid
         cursor.close()
         connection.close()
         
-        return {"mensaje": "Olla común creada exitosamente", "id": cursor.lastrowid}
+        return {"mensaje": "Olla común creada exitosamente", "id": inserted_id}
     
     except Exception as e:
         print(f"❌ Error creando olla: {str(e)}")
@@ -487,6 +505,9 @@ async def create_donacion(donacion_data: dict):
         olla_destino_id = int(donacion_data.get('ollaDestino') or donacion_data.get('olla_destino_id', 0))
         estado = donacion_data.get('estado', 'PENDIENTE').upper()
 
+        if not donor_name or not donor_email or not recurso or not olla_destino_id:
+            raise HTTPException(status_code=400, detail="Faltan datos obligatorios para registrar la donación")
+
         query = """
             INSERT INTO donaciones 
             (donante_nombre, donante_email, donante_telefono, tipo_recurso, cantidad_kg, olla_destino_id, fecha_donacion, estado)
@@ -510,6 +531,8 @@ async def create_donacion(donacion_data: dict):
         
         return {"mensaje": "Donación registrada exitosamente", "id": inserted_id}
     
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"❌ Error creando donación: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error al crear donación: {str(e)}")

@@ -140,7 +140,7 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Donación</label>
                   <select
-                    formControlName="tipoContribución"
+                    formControlName="tipoContribucion"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   >
                     <option value="">Selecciona un tipo</option>
@@ -296,7 +296,7 @@ export class RegisterComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       telefono: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      tipoContribución: [''],
+      tipoContribucion: [''],
       ubicacion: [''],
       nombreOlla: [''],
       numeroBeneficiarios: ['']
@@ -321,6 +321,22 @@ export class RegisterComponent implements OnInit {
     this.isLoading = true;
     const formData = this.registerForm.value;
 
+    if (this.selectedRole === 'donante') {
+      if (!formData.tipoContribucion || !formData.ubicacion) {
+        this.isLoading = false;
+        this.errorMessage = 'Por favor completa todos los campos requeridos para donante.';
+        return;
+      }
+    }
+
+    if (this.selectedRole === 'responsable') {
+      if (!formData.nombreOlla || !formData.ubicacion || !formData.numeroBeneficiarios) {
+        this.isLoading = false;
+        this.errorMessage = 'Por favor completa todos los campos requeridos para responsable de olla.';
+        return;
+      }
+    }
+
     const userData = {
       nombre: formData.nombre,
       email: formData.email,
@@ -328,13 +344,13 @@ export class RegisterComponent implements OnInit {
       telefono: formData.telefono,
       rol: this.selectedRole,
       ...(this.selectedRole === 'donante' && {
-        tipo_contribucion: formData['tipoContribución'] || formData.tipoContribucion,
+        tipo_contribucion: formData.tipoContribucion,
         ubicacion: formData.ubicacion
       }),
       ...(this.selectedRole === 'responsable' && {
         nombre_olla: formData.nombreOlla,
         ubicacion: formData.ubicacion,
-        numero_beneficiarios: formData.numeroBeneficiarios
+        numero_beneficiarios: Number(formData.numeroBeneficiarios)
       })
     };
 
