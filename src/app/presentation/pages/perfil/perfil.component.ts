@@ -8,7 +8,7 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
-    <div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="max-w-3xl mx-auto px-4 py-10 animate-fadeIn">
       <div class="bg-white shadow-lg rounded-2xl p-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
@@ -78,7 +78,18 @@ import { AutenticacionService } from '../../../domain/services/autenticacion.ser
       </div>
     </div>
   `,
-  styles: []
+  styles: [
+    `
+      .animate-fadeIn {
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `
+  ]
 })
 export class PerfilComponent implements OnInit {
   private readonly fb = inject(FormBuilder);

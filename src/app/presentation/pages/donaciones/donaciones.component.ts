@@ -11,7 +11,7 @@ import { OllaComunas } from '../../../domain/models/olla.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="min-h-screen bg-gray-50">
+    <div class="min-h-screen bg-gray-50 animate-fadeIn">
       <!-- Header -->
       <div class="bg-white border-b border-gray-200 py-8">
         <div class="container mx-auto px-4">
@@ -34,21 +34,21 @@ import { OllaComunas } from '../../../domain/models/olla.model';
       <div class="container mx-auto px-4 py-8">
         <!-- Statistics -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="text-2xl font-bold text-primary">1,250</div>
+          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 transition-transform duration-300 hover:-translate-y-1">
+            <div class="text-2xl font-bold text-primary">{{ donationCount }}</div>
             <div class="text-sm text-gray-600">Total Donaciones</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="text-2xl font-bold text-success">200</div>
+          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 transition-transform duration-300 hover:-translate-y-1">
+            <div class="text-2xl font-bold text-success">{{ donorCount }}</div>
             <div class="text-sm text-gray-600">Donantes Activos</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="text-2xl font-bold text-warning">5,000</div>
+          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 transition-transform duration-300 hover:-translate-y-1">
+            <div class="text-2xl font-bold text-warning">{{ familiesImpacted }}</div>
             <div class="text-sm text-gray-600">Familias Impactadas</div>
           </div>
-          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-            <div class="text-2xl font-bold text-primary">350</div>
-            <div class="text-sm text-gray-600">Kilos Distribuidos</div>
+          <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 transition-transform duration-300 hover:-translate-y-1">
+            <div class="text-2xl font-bold text-primary">{{ totalQuantity }}</div>
+            <div class="text-sm text-gray-600">Cantidad registrada</div>
           </div>
         </div>
 
@@ -228,17 +228,41 @@ import { OllaComunas } from '../../../domain/models/olla.model';
       </div>
     </div>
   `,
-  styles: []
+  styles: [
+    `
+      .animate-fadeIn {
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      .animate-fadeInUp {
+        animation: fadeInUp 0.4s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    `
+  ]
 })
 export class DonacionesComponent implements OnInit {
-  private donacionService = inject(DonacionService);
-  private ollaService = inject(OllaService);
+  private readonly donacionService = inject(DonacionService);
+  private readonly ollaService = inject(OllaService);
 
   donaciones: DonacionListItem[] = [];
   ollas: OllaComunas[] = [];
   isLoading = false;
   isSubmitting = false;
   formError: string | null = null;
+  donationCount = 0;
+  donorCount = 0;
+  familiesImpacted = 0;
+  totalQuantity = 0;
 
   donacionForm: CreateDonacionRequest = {
     donante: '',
@@ -260,6 +284,10 @@ export class DonacionesComponent implements OnInit {
     this.donacionService.obtenerDonaciones().subscribe({
       next: (data) => {
         this.donaciones = data;
+        this.donationCount = data.length;
+        this.donorCount = new Set(data.map(d => d.donante.toLowerCase())).size;
+        this.familiesImpacted = data.length;
+        this.totalQuantity = data.reduce((sum, item) => sum + Number(item.cantidad || 0), 0);
         this.isLoading = false;
       },
       error: () => {
